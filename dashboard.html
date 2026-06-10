@@ -945,6 +945,11 @@ try{
   const saved=localStorage.getItem('dashboard-playlist');
   if(saved)localTracks=JSON.parse(saved);
 }catch(e){}
+// Load from music-data.js if available and localStorage is empty
+if(localTracks.length===0 && typeof LOCAL_TRACKS!=='undefined' && LOCAL_TRACKS.length>0){
+  localTracks=LOCAL_TRACKS;
+}
+
 playlist=localTracks;
 
 function renderPlaylist(){

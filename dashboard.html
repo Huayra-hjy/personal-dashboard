@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Dashboard">
-<link rel="manifest" href="data:application/json;base64,eyJuYW...yIn0=">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRGFzaGJvYXJkIiwic2hvcnRfbmFtZSI6IkRhc2hib2FyZCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMDEwMTAyIiwidGhlbWVfY29sb3IiOiIjMDEwMTAyIn0=">
 <style>
-  /* ========== LINEAR DESIGN TOKENS=*** */
+  /* ========== LINEAR DESIGN TOKENS ========== */
   :root {
     /* Brand & Accent */
     --primary: #5e6ad2;
@@ -543,6 +543,48 @@
     background: var(--primary-hover);
   }
 
+  /* ========== HERMES STATUS ========== */
+  .hermes-status { display: flex; flex-direction: column; gap: 10px; }
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  .status-dot.online {
+    background: var(--success);
+    box-shadow: 0 0 6px var(--success);
+  }
+  .status-dot.offline {
+    background: var(--danger);
+    box-shadow: 0 0 6px var(--danger);
+  }
+  .status-dot.unknown { background: var(--ink-tertiary); }
+  .hermes-cron-list { margin-top: 8px; }
+  .cron-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .cron-item:last-child { border-bottom: none; }
+  .cron-schedule {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--primary);
+    min-width: 60px;
+  }
 
   /* ========== TODO ========== */
   .todo-input-wrap {
@@ -769,11 +811,1050 @@
     padding-left: 12px;
     border-left: 1px solid var(--hairline);
   }
-  .mode
+  .mode-btn {
+    background: none;
+    border: 1px solid var(--hairline);
+    color: var(--ink-tertiary);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: var(--font-text);
+    letter-spacing: 0.4px;
+  }
+  .mode-btn:hover {
+    border-color: var(--hairline-strong);
+    color: var(--ink-subtle);
+  }
+  .mode-btn.active {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(94, 106, 210, 0.08);
+  }
 
-... [OUTPUT TRUNCATED - 33412 chars omitted out of 83412 total] ...
+  /* ========== PLAYLIST PANEL ========== */
+  /* ========== LYRICS DISPLAY ========== */
+  .lyrics-bar {
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99;
+    text-align: center;
+    pointer-events: none;
+    max-width: 600px;
+    width: 90%;
+  }
+  .lyrics-text {
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--ink-subtle);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+    letter-spacing: -0.1px;
+  }
+  .lyrics-text.show { opacity: 1; }
 
-iv class="fd-temp">'+lo+'~'+hi+'°</div></div>';
+  .playlist-toggle {
+    position: fixed;
+    bottom: 80px;
+    right: var(--space-lg);
+    z-index: 101;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    color: var(--primary);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+  }
+  .playlist-toggle:hover {
+    background: var(--surface-3);
+    border-color: var(--hairline-strong);
+  }
+  .playlist-panel {
+    position: fixed;
+    bottom: 80px;
+    right: var(--space-lg);
+    z-index: 101;
+    width: 360px;
+    max-height: 450px;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    display: none;
+    overflow: hidden;
+  }
+  .playlist-panel.show { display: block; }
+  .playlist-header {
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--hairline);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .playlist-header button {
+    background: var(--surface-3);
+    border: 1px solid var(--hairline);
+    color: var(--primary);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: var(--font-text);
+  }
+  .playlist-header button:hover {
+    background: var(--surface-4);
+    border-color: var(--hairline-strong);
+  }
+  .playlist-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .playlist-tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-tertiary);
+    cursor: pointer;
+    transition: all var(--transition);
+    border-bottom: 2px solid transparent;
+    letter-spacing: 0.4px;
+  }
+  .playlist-tab:hover { color: var(--ink-subtle); }
+  .playlist-tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--primary);
+  }
+  .playlist-list { max-height: 340px; overflow-y: auto; }
+  .playlist-item {
+    padding: 10px var(--space-lg);
+    cursor: pointer;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .playlist-item:hover { background: var(--surface-3); }
+  .playlist-item.active { background: rgba(94, 106, 210, 0.08); }
+  .playlist-item .pi-num {
+    color: var(--ink-tertiary);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .playlist-item .pi-name {
+    flex: 1;
+    font-size: 13px;
+    color: var(--ink-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .playlist-item .pi-artist {
+    font-size: 11px;
+    color: var(--ink-tertiary);
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .playlist-item .pi-dur {
+    font-size: 11px;
+    color: var(--ink-tertiary);
+    min-width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+  }
+  .playlist-item.active .pi-name { color: var(--primary); }
+  .playlist-list::-webkit-scrollbar { width: 4px; }
+  .playlist-list::-webkit-scrollbar-thumb {
+    background: var(--hairline-strong);
+    border-radius: 2px;
+  }
+
+  .vis-canvas {
+    position: fixed;
+    bottom: 70px;
+    left: 0;
+    right: 0;
+    height: 50px;
+    pointer-events: none;
+    z-index: 99;
+  }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .card-span-3 { grid-column: span 2; }
+    .links { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    .card-span-2, .card-span-3 { grid-column: span 1; }
+    .links { grid-template-columns: repeat(3, 1fr); }
+    #clock { font-size: 48px; letter-spacing: -1.8px; }
+    .player-volume { display: none; }
+    .mode-group { display: none; }
+  }
+
+  /* ========== TOAST ========== */
+  .toast {
+    position: fixed;
+    top: var(--space-lg);
+    left: 50%;
+    transform: translateX(-50%) translateY(-60px);
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-muted);
+    z-index: 400;
+    transition: transform 0.3s var(--ease);
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ========== NOISE TEXTURE (GSAP-style) ========== */
+  /* Animated gradient mesh background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 20%, rgba(94,106,210,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(130,143,255,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 60% at 50% 50%, rgba(94,106,210,0.04) 0%, transparent 70%);
+    animation: meshDrift 20s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes meshDrift {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-2%, 1%) scale(1.02); }
+    100% { transform: translate(1%, -1%) scale(0.98); }
+  }
+
+  /* Mouse glow follower */
+  .mouse-glow {
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94,106,210,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    transform: translate(-50%, -50%);
+    transition: left 0.3s ease-out, top 0.3s ease-out;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* ========== GRADIENT TEXT (GSAP brand style) ========== */
+  .gradient-text {
+    background: linear-gradient(135deg, #5e6ad2, #828fff, #5e6ad2);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 4s ease infinite;
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* ========== ENTRANCE ANIMATIONS ========== */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95) translateY(12px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes clipReveal {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+
+  /* Initial hidden state - JS triggers visibility */
+  .reveal { opacity: 0; transform: translateY(24px); }
+  .reveal.visible {
+    animation: fadeInUp 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  }
+  .reveal-scale { opacity: 0; transform: scale(0.95) translateY(12px); }
+  .reveal-scale.visible {
+    animation: fadeInScale 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  }
+
+  /* Stagger delays for cards */
+  .reveal-d1 { animation-delay: 0.08s !important; }
+  .reveal-d2 { animation-delay: 0.16s !important; }
+  .reveal-d3 { animation-delay: 0.24s !important; }
+  .reveal-d4 { animation-delay: 0.32s !important; }
+  .reveal-d5 { animation-delay: 0.40s !important; }
+
+  /* Clock character reveal (SplitText-style) */
+  #clock .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(16px);
+    background: linear-gradient(135deg, #5e6ad2, #828fff, #a78bfa);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  /* Clock reflection */
+  #clock {
+    position: relative;
+  }
+  #clock-reflection {
+    font-family: var(--font-display);
+    font-size: 80px;
+    font-weight: 600;
+    letter-spacing: -3.0px;
+    line-height: 1.05;
+    background: linear-gradient(135deg, #5e6ad2, #828fff, #a78bfa);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transform: scaleY(-1);
+    opacity: 0.08;
+    filter: blur(2px);
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 60%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 60%);
+    pointer-events: none;
+    user-select: none;
+    height: 30px;
+    overflow: hidden;
+    margin-top: -4px;
+  }
+  #clock .char.revealed {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),
+                transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+    animation: gradientShift 4s ease infinite;
+  }
+  #clock .char.flip {
+    animation: charFlip 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+  @keyframes charFlip {
+    0% { transform: scale(1) translateY(0); }
+    30% { transform: scale(1.2, 0.8) translateY(-6px); }
+    50% { transform: scale(0.85, 1.15) translateY(3px); opacity: 0.6; }
+    100% { transform: scale(1) translateY(0); }
+  }
+
+  /* ========== BUTTON FLAIR (GSAP-style hover) ========== */
+  .flair-btn {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .flair-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(94,106,210,0.15), transparent);
+    transition: left 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+    z-index: -1;
+  }
+  .flair-btn:hover::before { left: 100%; }
+
+  /* ========== HOVER MICRO-INTERACTIONS ========== */
+  .card {
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card:hover {
+    border-color: var(--hairline-strong);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 40px rgba(94,106,210,0.08);
+  }
+  .links a {
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .links a::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(94,106,210,0.08), transparent);
+    transition: left 0.35s ease;
+  }
+  .links a:hover::before { left: 100%; }
+  .links a:hover {
+    transform: translateY(-2px);
+    border-color: var(--hairline-strong);
+    background: var(--surface-2);
+  }
+
+  /* Search focus glow (GSAP-style) */
+  .search-box:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(94,106,210,0.2), 0 0 40px rgba(94,106,210,0.08);
+  }
+
+  /* Todo input focus glow */
+  /* ========== SYSTEM MONITOR ========== */
+  .sys-bar-wrap {
+    margin-bottom: 10px;
+  }
+  .sys-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-bottom: 4px;
+  }
+  .sys-bar {
+    height: 6px;
+    background: var(--surface-3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .sys-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+  .sys-bar-fill.cpu { background: var(--primary); }
+  .sys-bar-fill.mem { background: var(--success); }
+  .sys-bar-fill.heap { background: var(--warning); }
+
+  /* ========== GITHUB HEATMAP ========== */
+  .gh-grid {
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .gh-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--surface-3);
+    transition: background 0.2s;
+  }
+  .gh-cell.l1 { background: rgba(94,106,210,0.2); }
+  .gh-cell.l2 { background: rgba(94,106,210,0.4); }
+  .gh-cell.l3 { background: rgba(94,106,210,0.6); }
+  .gh-cell.l4 { background: var(--primary); }
+  .gh-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--ink-tertiary);
+  }
+
+  /* ========== COUNTDOWN ========== */
+  .countdown-list { margin-top: 8px; }
+  .countdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 13px;
+  }
+  .countdown-item:last-child { border-bottom: none; }
+  .cd-name { color: var(--ink-muted); }
+  .cd-days {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .cd-days.soon { color: var(--warning); }
+  .cd-days.today { color: var(--success); }
+  .cd-add-wrap {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .cd-add-input {
+    flex: 1;
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    color: var(--ink);
+    font-size: 12px;
+    font-family: var(--font-text);
+    outline: none;
+  }
+  .cd-add-input:focus {
+    border-color: var(--primary);
+  }
+  .cd-add-btn {
+    background: var(--primary);
+    border: none;
+    color: var(--on-primary);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font-text);
+  }
+
+  .todo-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(94,106,210,0.2);
+  }
+
+  /* ========== COMMAND PALETTE (Cmd+K) ========== */
+  .cmd-palette-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 20vh;
+  }
+  .cmd-palette-overlay.show { display: flex; }
+  .cmd-palette {
+    width: 520px;
+    max-height: 400px;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+  .cmd-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--hairline);
+    padding: 16px 20px;
+    color: var(--ink);
+    font-size: 16px;
+    font-family: var(--font-text);
+    outline: none;
+    letter-spacing: -0.05px;
+  }
+  .cmd-input::placeholder { color: var(--ink-tertiary); }
+  .cmd-list {
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 6px;
+  }
+  .cmd-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.1s;
+    font-size: 14px;
+    color: var(--ink-muted);
+  }
+  .cmd-item:hover, .cmd-item.active {
+    background: var(--surface-3);
+    color: var(--ink);
+  }
+  .cmd-item .cmd-icon {
+    width: 20px;
+    text-align: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .cmd-item .cmd-label { flex: 1; }
+  .cmd-item .cmd-shortcut {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--ink-tertiary);
+    padding: 2px 6px;
+    background: var(--surface-1);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--hairline);
+  }
+  .cmd-list::-webkit-scrollbar { width: 4px; }
+  .cmd-list::-webkit-scrollbar-thumb {
+    background: var(--hairline-strong);
+    border-radius: 2px;
+  }
+
+  /* ========== SHORTCUT HELP ========== */
+  .shortcut-help {
+    position: fixed;
+    bottom: 80px;
+    left: var(--space-lg);
+    z-index: 101;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    color: var(--ink-tertiary);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    font-family: var(--font-text);
+  }
+  .shortcut-help:hover {
+    background: var(--surface-3);
+    color: var(--ink);
+    border-color: var(--hairline-strong);
+  }
+  .shortcut-panel {
+    position: fixed;
+    bottom: 120px;
+    left: var(--space-lg);
+    z-index: 101;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
+    display: none;
+    min-width: 240px;
+  }
+  .shortcut-panel.show { display: block; }
+  .shortcut-panel h4 {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 10px;
+  }
+  .shortcut-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+  .shortcut-row kbd {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-tertiary);
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-xs);
+    padding: 2px 6px;
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="music-data.js"></script>
+<!-- GSAP (CDN + fallback) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Mouse glow follower -->
+<div class="mouse-glow" id="mouseGlow"></div>
+
+<div class="page">
+  <!-- Header -->
+  <div class="header reveal">
+    <div id="clock"></div>
+    <div id="clock-reflection"></div>
+    <div id="date"></div>
+    <div id="greeting"></div>
+    <div style="margin-top:12px;display:flex;justify-content:center;gap:6px">
+      <button class="mode-btn theme-btn" data-theme="linear" onclick="applyTheme('linear')">🌙 Linear</button>
+      <button class="mode-btn theme-btn" data-theme="neon" onclick="applyTheme('neon')">💜 Neon</button>
+      <button class="mode-btn theme-btn" data-theme="pastel" onclick="applyTheme('pastel')">☀️ Pastel</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap reveal reveal-d1">
+    <div class="search-engines">
+      <button class="se-btn active flair-btn" data-url="https://www.google.com/search?q=">Google</button>
+      <button class="se-btn" data-url="https://www.bing.com/search?q=">Bing</button>
+      <button class="se-btn" data-url="https://github.com/search?q=">GitHub</button>
+      <button class="se-btn" data-url="https://search.bilibili.com/all?keyword=">B站</button>
+      <button class="se-btn" data-url="https://www.douyin.com/search/">抖音</button>
+      <button class="se-btn" data-url="https://www.zhihu.com/search?type=">知乎</button>
+    </div>
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="搜索任何东西..." autocomplete="off"/>
+      <span class="search-icon">⌕</span>
+      <div class="search-suggestions" id="suggestions">
+        <div class="suggestion-item" data-url="https://www.bilibili.com">B站 <span class="shortcut">⌘1</span></div>
+        <div class="suggestion-item" data-url="https://www.zhihu.com">知乎 <span class="shortcut">⌘2</span></div>
+        <div class="suggestion-item" data-url="https://juejin.cn">掘金 <span class="shortcut">⌘3</span></div>
+        <div class="suggestion-item" data-url="https://github.com">GitHub <span class="shortcut">⌘4</span></div>
+        <div class="suggestion-item" data-url="https://www.deepseek.com">DeepSeek <span class="shortcut">⌘5</span></div>
+        <div class="suggestion-item" data-url="https://www.douyin.com">抖音 <span class="shortcut">⌘6</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards Grid -->
+  <div class="grid">
+    <!-- Weather -->
+    <div class="card reveal-scale reveal-d1">
+      <div class="card-label"><span class="label-icon">🌤</span> 天气</div>
+      <div id="weather-icon">🌙</div>
+      <div id="weather-temp">--°</div>
+      <div id="weather-desc">加载中...</div>
+      <div class="weather-forecast" id="weatherForecast"></div>
+    </div>
+
+    <!-- Quote -->
+    <div class="card reveal-scale reveal-d2" style="display:flex;flex-direction:column">
+      <div class="card-label"><span class="label-icon">💬</span> 每日一句</div>
+      <div class="quote-wrap">
+        <div class="quote-mark">"</div>
+        <div id="quote"></div>
+        <div id="quote-author"></div>
+      </div>
+      <button class="quote-refresh flair-btn" onclick="loadQuote()">↻ 换一句</button>
+    </div>
+
+    <!-- Hermes Status -->
+    <div class="card reveal-scale reveal-d2">
+      <div class="card-label"><span class="label-icon">🤖</span> Hermes Agent</div>
+      <div class="hermes-status" id="hermesStatus">
+        <div class="status-row">
+          <span>Gateway</span>
+          <span id="hermesGateway"><span class="status-dot unknown"></span>检测中...</span>
+        </div>
+        <div class="status-row">
+          <span>版本</span>
+          <span id="hermesVersion">--</span>
+        </div>
+        <div class="status-row">
+          <span>模型</span>
+          <span id="hermesModel">--</span>
+        </div>
+        <div class="hermes-cron-list" id="hermesCronList"></div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="card card-span-2 reveal-scale reveal-d3">
+      <div class="card-label links-header" style="margin-bottom:0">
+        <span style="display:flex;align-items:center;gap:6px"><span class="label-icon">🔗</span> 快捷入口</span>
+        <button class="links-edit-btn" id="linksEditBtn" onclick="toggleEditLinks()">编辑</button>
+      </div>
+      <div style="margin-top:var(--space-md)">
+        <div class="links" id="linksGrid"></div>
+      </div>
+    </div>
+
+    <!-- Todo -->
+    <div class="card reveal-scale reveal-d3">
+      <div class="card-label"><span class="label-icon">✅</span> 待办</div>
+      <div class="todo-input-wrap">
+        <input class="todo-input" id="todoInput" placeholder="添加待办..." />
+        <button class="todo-add-btn flair-btn" onclick="addTodo()">添加</button>
+      </div>
+      <div class="todo-list" id="todoList"></div>
+    </div>
+
+    <!-- System Monitor -->
+    <div class="card reveal-scale reveal-d4">
+      <div class="card-label"><span class="label-icon">📊</span> 系统监控</div>
+      <div id="sysMonitor">
+        <div class="sys-bar-wrap">
+          <div class="sys-bar-label"><span>CPU 核心</span><span id="cpuVal">--</span></div>
+          <div class="sys-bar"><div class="sys-bar-fill cpu" id="cpuBar" style="width:0%"></div></div>
+        </div>
+        <div class="sys-bar-wrap">
+          <div class="sys-bar-label"><span>JS 堆内存</span><span id="heapVal">--</span></div>
+          <div class="sys-bar"><div class="sys-bar-fill heap" id="heapBar" style="width:0%"></div></div>
+        </div>
+        <div class="sys-bar-wrap">
+          <div class="sys-bar-label"><span>连接类型</span><span id="netVal">--</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GitHub Heatmap -->
+    <div class="card reveal-scale reveal-d4">
+      <div class="card-label"><span class="label-icon">🟩</span> 贡献热力图</div>
+      <div class="gh-grid" id="ghGrid"></div>
+      <div class="gh-stats">
+        <span id="ghTotal">-- 次贡献</span>
+        <span>最近 20 周</span>
+      </div>
+    </div>
+
+    <!-- Countdown -->
+    <div class="card reveal-scale reveal-d5">
+      <div class="card-label"><span class="label-icon">⏳</span> 倒计时</div>
+      <div class="countdown-list" id="countdownList"></div>
+      <div class="cd-add-wrap">
+        <input class="cd-add-input" id="cdNameInput" placeholder="名称" />
+        <input class="cd-add-input" id="cdDateInput" type="date" />
+        <button class="cd-add-btn" onclick="addCountdown()">+</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Link edit dialog -->
+<div class="link-dialog" id="linkDialog">
+  <div class="link-dialog-box">
+    <h3>添加快捷链接</h3>
+    <input id="linkNameInput" placeholder="名称 (如: B站)" />
+    <input id="linkUrlInput" placeholder="URL (如: https://bilibili.com)" />
+    <input id="linkIconInput" placeholder="图标 URL (可选，留空自动获取 favicon)" />
+    <div class="dialog-actions">
+      <button class="dialog-btn dialog-btn-cancel" onclick="closeLinkDialog()">取消</button>
+      <button class="dialog-btn dialog-btn-save" onclick="saveLink()">保存</button>
+    </div>
+  </div>
+</div>
+
+<canvas class="vis-canvas" id="visCanvas"></canvas>
+
+<!-- Lyrics Display -->
+<div class="lyrics-bar" id="lyricsBar">
+  <div class="lyrics-text" id="lyricsText"></div>
+</div>
+
+<!-- Player Bar -->
+<div class="player-bar">
+  <div class="player-cover" id="playerCover">♪</div>
+  <div class="player-info">
+    <div class="player-title" id="playerTitle">未在播放</div>
+    <div class="player-artist" id="playerArtist">选择一首歌开始</div>
+  </div>
+  <div class="player-controls">
+    <button class="player-btn" id="prevBtn">⏮</button>
+    <button class="player-btn play-btn" id="playBtn">▶</button>
+    <button class="player-btn" id="nextBtn">⏭</button>
+    <div class="mode-group">
+      <button class="mode-btn" id="shuffleBtn">随机</button>
+      <button class="mode-btn" id="repeatBtn">单曲</button>
+    </div>
+  </div>
+  <div class="player-progress">
+    <span class="progress-time" id="timeNow">0:00</span>
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-time" id="timeTotal">0:00</span>
+  </div>
+  <div class="player-volume">
+    <span style="color:var(--ink-tertiary);font-size:14px">🔊</span>
+    <div class="volume-bar" id="volumeBar"><div class="volume-fill" id="volumeFill"></div></div>
+  </div>
+</div>
+
+<button class="playlist-toggle" id="playlistToggle">♫</button>
+
+<div class="playlist-panel" id="playlistPanel">
+  <div class="playlist-header">
+    <span>播放列表</span>
+    <button id="addMusicBtn">+ 添加音乐</button>
+  </div>
+  <div class="playlist-tabs">
+    <div class="playlist-tab active" data-tab="local">本地音乐</div>
+    <div class="playlist-tab" data-tab="radio">在线电台</div>
+  </div>
+  <div class="playlist-list" id="playlistList"></div>
+</div>
+
+<input type="file" id="fileInput" accept="audio/*" multiple style="display:none"/>
+
+<!-- Command Palette -->
+<div class="cmd-palette-overlay" id="cmdOverlay">
+  <div class="cmd-palette">
+    <input class="cmd-input" id="cmdInput" placeholder="输入命令或搜索..." autocomplete="off"/>
+    <div class="cmd-list" id="cmdList"></div>
+  </div>
+</div>
+
+<!-- Shortcut Help -->
+<button class="shortcut-help" id="shortcutHelpBtn">?</button>
+<div class="shortcut-panel" id="shortcutPanel">
+  <h4>快捷键</h4>
+  <div class="shortcut-row"><span>命令面板</span><kbd>⌘K</kbd></div>
+  <div class="shortcut-row"><span>搜索</span><kbd>/</kbd></div>
+  <div class="shortcut-row"><span>播放/暂停</span><kbd>Space</kbd></div>
+  <div class="shortcut-row"><span>快进/快退</span><kbd>← →</kbd></div>
+  <div class="shortcut-row"><span>快捷导航</span><kbd>⌘1-6</kbd></div>
+</div>
+
+
+
+<script>
+
+
+// ========== TOAST ==========
+function showToast(msg, duration=2000) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), duration);
+}
+
+// ========== CLOCK ==========
+let clockChars = null;
+let lastClockStr = '';
+
+function splitClockChars(str) {
+  const el = document.getElementById('clock');
+  if (!clockChars || clockChars.length !== str.length) {
+    el.innerHTML = '';
+    clockChars = [];
+    for (let i = 0; i < str.length; i++) {
+      const inner = document.createElement('span');
+      inner.className = 'char';
+      inner.textContent = str[i];
+      el.appendChild(inner);
+      clockChars.push(inner);
+    }
+    // Staggered reveal
+    clockChars.forEach((c, i) => {
+      setTimeout(() => c.classList.add('revealed'), i * 60);
+    });
+  } else {
+    for (let i = 0; i < str.length; i++) {
+      if (clockChars[i].textContent !== str[i]) {
+        clockChars[i].textContent = str[i];
+        // Trigger flip animation
+        clockChars[i].classList.remove('flip');
+        void clockChars[i].offsetWidth; // Force reflow
+        clockChars[i].classList.add('flip');
+      }
+    }
+  }
+}
+
+function updateClock(){
+  const now=new Date();
+  const timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  splitClockChars(timeStr);
+  const days=['日','一','二','三','四','五','六'];
+  document.getElementById('date').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日 星期'+days[now.getDay()];
+  const h=now.getHours();let g='夜深了';
+  if(h>=5&&h<9)g='早安';else if(h>=9&&h<12)g='上午好';else if(h>=12&&h<14)g='中午好';else if(h>=14&&h<18)g='下午好';else if(h>=18&&h<22)g='晚上好';
+  document.getElementById('greeting').textContent=g+'，殿下';
+}
+updateClock();setInterval(updateClock,1000);
+
+// ========== MOUSE GLOW ==========
+const mouseGlow=document.getElementById('mouseGlow');
+document.addEventListener('mousemove',e=>{
+  mouseGlow.style.left=e.clientX+'px';
+  mouseGlow.style.top=e.clientY+'px';
+});
+
+// ========== CLOCK REFLECTION ==========
+const clockReflection=document.getElementById('clock-reflection');
+setInterval(()=>{
+  const clockEl=document.getElementById('clock');
+  clockReflection.textContent=clockEl.textContent;
+},1000);
+
+// ========== INTERSECTION OBSERVER ==========
+if(typeof gsap==='undefined'){
+  // Only use CSS IntersectionObserver when GSAP is NOT available
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal, .reveal-scale').forEach(el => {
+    revealObserver.observe(el);
+  });
+}
+
+// ========== QUOTE ==========
+const fallbackQuotes=[
+  ['程序必须写给人看，顺便能被机器执行。','Harold Abelson'],
+  ['过早优化是万恶之源。','Donald Knuth'],
+  ['Talk is cheap, show me the code.','Linus Torvalds'],
+  ['简单是可靠的前提。','Edsger Dijkstra'],
+  ['任何足够先进的技术都与魔法无异。','Arthur C. Clarke'],
+  ['软件设计就像建筑一样，少即是多。','Ludwig Mies van der Rohe'],
+  ['好的工具不会增加复杂度，而是消解它。','Alan Kay'],
+];
+function loadQuote(){
+  fetch('https://v1.hitokoto.cn/?c=d&c=h&c=i&c=k&encode=json')
+    .then(r=>r.json())
+    .then(d=>{
+      document.getElementById('quote').textContent=d.hitokoto;
+      document.getElementById('quote-author').textContent='— '+(d.from_who||d.from||'佚名');
+    })
+    .catch(()=>{
+      const q=fallbackQuotes[Math.floor(Math.random()*fallbackQuotes.length)];
+      document.getElementById('quote').textContent=q[0];
+      document.getElementById('quote-author').textContent='— '+q[1];
+    });
+}
+loadQuote();
+
+// ========== WEATHER ==========
+const weatherIcons={113:'☀️',116:'⛅',119:'☁️',122:'☁️',143:'🌫',176:'🌦',179:'🌨',182:'🌨',185:'🌨',200:'⛈',227:'🌨',230:'❄️',248:'🌫',260:'🌫',263:'🌦',266:'🌦',281:'🌨',284:'🌨',293:'🌦',296:'🌦',299:'🌧',302:'🌧',305:'🌧',308:'🌧',311:'🌨',314:'🌨',317:'🌨',320:'🌨',323:'🌨',326:'🌨',329:'❄️',332:'❄️',335:'❄️',338:'❄️',350:'🌨',353:'🌦',356:'🌧',359:'🌧',362:'🌨',365:'🌨',368:'🌨',371:'❄️',374:'🌨',377:'🌨',386:'⛈',389:'🌧',392:'⛈',395:'❄️'};
+function getWeatherIcon(code){return weatherIcons[code]||'🌤'}
+
+fetch('https://wttr.in/?format=j1').then(r=>r.json()).then(d=>{
+  const c=d.current_condition[0];
+  const temp=c.temp_C;
+  const desc=c.lang_zh&&c.lang_zh[0]?c.lang_zh[0].value:c.weatherDesc[0].value;
+  document.getElementById('weather-icon').textContent=getWeatherIcon(parseInt(c.weatherCode));
+  document.getElementById('weather-temp').textContent=temp+'°C';
+  document.getElementById('weather-desc').textContent=desc+' · 体感'+c.FeelsLikeC+'°C';
+
+  if(d.weather&&d.weather.length>1){
+    const today=new Date();
+    const dayNames=['今天','明天','后天'];
+    let html='';
+    for(let i=1;i<Math.min(d.weather.length,4);i++){
+      const w=d.weather[i];
+      const hi=w.maxtempC; const lo=w.mintempC;
+      const icon=getWeatherIcon(parseInt(w.hourly[4].weatherCode));
+      html+='<div class="forecast-day"><div class="fd-label">'+dayNames[i]+'</div><div class="fd-icon">'+icon+'</div><div class="fd-temp">'+lo+'~'+hi+'°</div></div>';
     }
     document.getElementById('weatherForecast').innerHTML=html;
   }
@@ -783,6 +1864,49 @@ iv class="fd-temp">'+lo+'~'+hi+'°</div></div>';
   document.getElementById('weather-desc').onclick=()=>location.reload();
 });
 
+// ========== HERMES STATUS ==========
+async function checkHermes(){
+  const gatewayEl=document.getElementById('hermesGateway');
+  const versionEl=document.getElementById('hermesVersion');
+  const modelEl=document.getElementById('hermesModel');
+  const cronEl=document.getElementById('hermesCronList');
+
+  try {
+    const r=await fetch('http://127.0.0.1:9119/api/status',{signal:AbortSignal.timeout(3000)});
+    if(r.ok){
+      const d=await r.json();
+      gatewayEl.innerHTML='<span class="status-dot online"></span>运行中';
+      versionEl.textContent=d.version||'--';
+      modelEl.textContent=d.model||'--';
+    } else {
+      gatewayEl.innerHTML='<span class="status-dot offline"></span>异常 ('+r.status+')';
+    }
+  } catch(e){
+    try {
+      const r2=await fetch('http://127.0.0.1:8642/health',{signal:AbortSignal.timeout(3000)});
+      if(r2.ok){
+        gatewayEl.innerHTML='<span class="status-dot online"></span>Gateway 运行中';
+      } else {
+        gatewayEl.innerHTML='<span class="status-dot offline"></span>未响应';
+      }
+    } catch(e2){
+      gatewayEl.innerHTML='<span class="status-dot offline"></span>未运行';
+    }
+  }
+
+  try {
+    const r=await fetch('http://127.0.0.1:9119/api/cron',{signal:AbortSignal.timeout(3000)});
+    if(r.ok){
+      const jobs=await r.json();
+      if(Array.isArray(jobs)&&jobs.length>0){
+        cronEl.innerHTML=jobs.slice(0,4).map(j=>
+          '<div class="cron-item"><span class="cron-schedule">'+(j.schedule||'')+'</span><span>'+(j.name||j.prompt?.substring(0,30)||'未命名')+'</span></div>'
+        ).join('');
+      }
+    }
+  } catch(e){ /* ignore */ }
+}
+checkHermes();
 
 // ========== TODO ==========
 let todos=JSON.parse(localStorage.getItem('dashboard-todos')||'[]');
@@ -923,10 +2047,10 @@ const addMusicBtn=document.getElementById('addMusicBtn');
 const fileInput=document.getElementById('fileInput');
 
 // Load radio stations
+let currentTab='local';
 if(typeof RADIO_STATIONS!=='undefined'){
   const radioTab=document.querySelector('[data-tab="radio"]');
   const localTab=document.querySelector('[data-tab="local"]');
-  let currentTab='local';
 
   document.querySelectorAll('.playlist-tab').forEach(tab=>{
     tab.onclick=()=>{
@@ -949,7 +2073,6 @@ try{
 if(localTracks.length===0 && typeof LOCAL_TRACKS!=='undefined' && LOCAL_TRACKS.length>0){
   localTracks=LOCAL_TRACKS;
 }
-
 playlist=localTracks;
 
 function renderPlaylist(){
@@ -1065,9 +2188,11 @@ if('mediaSession' in navigator){
   navigator.mediaSession.setActionHandler('seekforward',()=>{audio.currentTime=Math.min(audio.duration||0,audio.currentTime+10)});
 }
 
-playlistToggle.onclick=()=>{
+playlistToggle.onclick=(e)=>{
   const isOpen=playlistPanel.classList.toggle('show');
   playlistToggle.textContent=isOpen?'✕':'♫';
+  // Prevent document click listener from immediately closing
+  e.stopPropagation();
 };
 document.addEventListener('click',e=>{
   if(!playlistPanel.contains(e.target)&&e.target!==playlistToggle&&playlistPanel.classList.contains('show')){
@@ -1144,6 +2269,7 @@ const CMD_ITEMS=[
   {icon:'🔁',label:'单曲循环',action:()=>setMode('repeat')},
   {icon:'✅',label:'添加待办',action:()=>{document.getElementById('todoInput').focus()}},
   {icon:'🔗',label:'添加快捷链接',action:()=>openLinkDialog()},
+  {icon:'🌤',label:'刷新天气',action:()=>location.reload()},
   {icon:'💬',label:'换一句名言',action:()=>loadQuote()},
   {icon:'📋',label:'复制当前时间',action:()=>{navigator.clipboard.writeText(new Date().toLocaleString());showToast('已复制时间')}},
   {icon:'🏠',label:'回到顶部',action:()=>window.scrollTo({top:0,behavior:'smooth'})},
@@ -1376,31 +2502,31 @@ if(typeof gsap!=='undefined'){
   // Header timeline: clock → reflection → date → greeting → theme btns
   const headerTl=gsap.timeline({ delay: 0.2 });
   headerTl
-    .from('#clock', { autoAlpha: 0, y: 40, scale: 0.95, duration: 0.9, ease: 'back.out(1.4)' })
-    .from('#clock-reflection', { autoAlpha: 0, scaleY: 0, duration: 0.4 }, '-=0.3')
-    .from('#date', { autoAlpha: 0, y: 15, duration: 0.5 }, '-=0.2')
-    .from('#greeting', { autoAlpha: 0, y: 15, duration: 0.5 }, '-=0.3')
-    .from('.header .theme-btn', { autoAlpha: 0, y: 10, stagger: 0.08, duration: 0.4 }, '-=0.2');
+    .from('#clock', { autoAlpha: 0, y: 40, scale: 0.95, duration: 0.9, ease: 'back.out(1.4)', clearProps: 'all' })
+    .from('#clock-reflection', { autoAlpha: 0, scaleY: 0, duration: 0.4, clearProps: 'all' }, '-=0.3')
+    .from('#date', { autoAlpha: 0, y: 15, duration: 0.5, clearProps: 'all' }, '-=0.2')
+    .from('#greeting', { autoAlpha: 0, y: 15, duration: 0.5, clearProps: 'all' }, '-=0.3')
+    .from('.header .theme-btn', { autoAlpha: 0, y: 10, stagger: 0.08, duration: 0.4, clearProps: 'all' }, '-=0.2');
 
   // Search: scale-in with overshoot
-  gsap.from('.search-wrap', { autoAlpha: 0, y: 20, scale: 0.97, duration: 0.7, delay: 0.5, ease: 'back.out(1.2)' });
+  gsap.from('.search-wrap', { autoAlpha: 0, y: 20, scale: 0.97, duration: 0.7, delay: 0.5, ease: 'back.out(1.2)', clearProps: 'all' });
 
   // Cards: staggered with slight random rotation
   gsap.from('.card', {
     autoAlpha: 0, y: 50, scale: 0.96,
     rotation: ()=>gsap.utils.random(-2, 2),
     stagger: { amount: 0.6, from: 'start' },
-    duration: 0.8, delay: 0.7, ease: 'back.out(1.3)', clearProps: 'rotation'
+    duration: 0.8, delay: 0.7, ease: 'back.out(1.3)', clearProps: 'all'
   });
 
   // Links: stagger pop-in from edges
-  gsap.from('.links a', { autoAlpha: 0, scale: 0.8, y: 15, stagger: { amount: 0.4, from: 'edges' }, duration: 0.5, delay: 1.0, ease: 'back.out(1.7)' });
+  gsap.from('.links a', { autoAlpha: 0, scale: 0.8, y: 15, stagger: { amount: 0.4, from: 'edges' }, duration: 0.5, delay: 1.0, ease: 'back.out(1.7)', clearProps: 'all' });
 
   // Player bar: slide up
-  gsap.from('.player-bar', { y: 80, autoAlpha: 0, duration: 0.6, delay: 1.2, ease: 'power3.out' });
+  gsap.from('.player-bar', { y: 80, autoAlpha: 0, duration: 0.6, delay: 1.2, ease: 'power3.out', clearProps: 'all' });
 
   // Floating buttons: pop
-  gsap.from('.playlist-toggle, .shortcut-help', { scale: 0, autoAlpha: 0, duration: 0.4, delay: 1.4, ease: 'back.out(2)', stagger: 0.1 });
+  gsap.from('.playlist-toggle, .shortcut-help', { scale: 0, autoAlpha: 0, duration: 0.4, delay: 1.4, ease: 'back.out(2)', stagger: 0.1, clearProps: 'all' });
 
   // Play button: breathing pulse
   gsap.to('.play-btn', { boxShadow: '0 0 20px rgba(94,106,210,0.4)', scale: 1.05, duration: 1.2, repeat: -1, yoyo: true, ease: 'sine.inOut' });

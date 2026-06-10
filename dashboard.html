@@ -835,28 +835,6 @@
   }
 
   /* ========== PLAYLIST PANEL ========== */
-  /* ========== LYRICS DISPLAY ========== */
-  .lyrics-bar {
-    position: fixed;
-    bottom: 70px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 99;
-    text-align: center;
-    pointer-events: none;
-    max-width: 600px;
-    width: 90%;
-  }
-  .lyrics-text {
-    font-family: var(--font-display);
-    font-size: 14px;
-    color: var(--ink-subtle);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    text-shadow: 0 1px 8px rgba(0,0,0,0.5);
-    letter-spacing: -0.1px;
-  }
-  .lyrics-text.show { opacity: 1; }
 
   .playlist-toggle {
     position: fixed;
@@ -1655,11 +1633,6 @@
 
 <canvas class="vis-canvas" id="visCanvas"></canvas>
 
-<!-- Lyrics Display -->
-<div class="lyrics-bar" id="lyricsBar">
-  <div class="lyrics-text" id="lyricsText"></div>
-</div>
-
 <!-- Player Bar -->
 <div class="player-bar">
   <div class="player-cover" id="playerCover">♪</div>
@@ -2100,6 +2073,8 @@ function playTrack(idx){
   currentIndex=idx;
   const track=playlist[idx];
   isStream=track.type==='stream';
+  // Set crossOrigin for streams (needed for visualizer), remove for local files
+  audio.crossOrigin=isStream?'anonymous':null;
   audio.src=track.url;
   audio.play().then(()=>{isPlaying=true;playBtn.textContent='⏸';playerCover.classList.add('playing')}).catch(()=>{playerTitle.textContent='播放失败'});
   playerTitle.textContent=track.name;
@@ -2420,27 +2395,6 @@ document.querySelectorAll('.reveal-d4').forEach(el=>el.style.animationDelay='0.3
 document.querySelectorAll('.reveal-d5').forEach(el=>el.style.animationDelay='0.40s');
 
 // ========== THEME SYSTEM ==========
-// ========== LYRICS DISPLAY ==========
-const lyricsText=document.getElementById('lyricsText');
-const LYRICS_PLACEHOLDER=[
-  '音乐是灵魂的语言...',
-  '让旋律带你飞翔...',
-  '每一个音符都有故事...',
-  '沉浸在音乐的世界里...',
-];
-let lyricsIdx=0;
-function updateLyrics(){
-  if(isPlaying){
-    lyricsText.textContent=LYRICS_PLACEHOLDER[lyricsIdx%LYRICS_PLACEHOLDER.length];
-    lyricsText.classList.add('show');
-    lyricsIdx++;
-  } else {
-    lyricsText.classList.remove('show');
-  }
-}
-setInterval(updateLyrics,8000);
-audio.addEventListener('play',()=>{lyricsIdx=0;updateLyrics()});
-audio.addEventListener('pause',()=>lyricsText.classList.remove('show'));
 
 const THEMES={
   linear:{

@@ -2073,8 +2073,27 @@ function playTrack(idx){
   currentIndex=idx;
   const track=playlist[idx];
   isStream=track.type==='stream';
-  audio.src=track.url;
-  audio.play().then(()=>{isPlaying=true;playBtn.textContent='⏸';playerCover.classList.add('playing')}).catch(()=>{playerTitle.textContent='播放失败'});
+  // Try with crossOrigin for visualizer, fallback without if it fails
+  if(isStream){
+    audio.crossOrigin='anonymous';
+    audio.src=track.url;
+    // If CORS blocks the request, the 'error' event fires — retry without crossOrigin
+    const onError=()=>{
+      audio.removeEventListener('error',onError);
+      audio.crossOrigin=null;
+      audio.src=track.url;
+      audio.play().then(()=>{isPlaying=true;playBtn.textContent='⏸';playerCover.classList.add('playing')}).catch(()=>{});
+    };
+    audio.addEventListener('error',onError,{once:true});
+    audio.play().then(()=>{
+      audio.removeEventListener('error',onError);
+      isPlaying=true;playBtn.textContent='⏸';playerCover.classList.add('playing');
+    }).catch(()=>{});
+  } else {
+    audio.crossOrigin=null;
+    audio.src=track.url;
+    audio.play().then(()=>{isPlaying=true;playBtn.textContent='⏸';playerCover.classList.add('playing')}).catch(()=>{playerTitle.textContent='播放失败'});
+  }
   playerTitle.textContent=track.name;
   playerArtist.textContent=track.artist||'未知';
   updateMediaSession(track);
@@ -2187,43 +2206,34 @@ function fmtTime(s){const m=Math.floor(s/60);const sec=Math.floor(s%60);return m
 // ========== VISUALIZER ==========
 const visCanvas=document.getElementById('visCanvas');
 const visCtx=visCanvas.getContext('2d');
-const visBars=64;
-let visValues=new Array(visBars).fill(0);
-let visTargets=new Array(visBars).fill(0);
-
+let audioCtx,analyser,dataArray,source;
+function initVisualizer(){
+  if(audioCtx)return;
+  try{
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    analyser=audioCtx.createAnalyser();analyser.fftSize=256;
+    source=audioCtx.createMediaElementSource(audio);
+    source.connect(analyser);analyser.connect(audioCtx.destination);
+    dataArray=new Uint8Array(analyser.frequencyBinCount);
+    drawVis();
+  }catch(e){/* CORS blocked — visualizer won't work for this stream */}
+}
 function drawVis(){
   requestAnimationFrame(drawVis);
+  analyser.getByteFrequencyData(dataArray);
   visCanvas.width=window.innerWidth;visCanvas.height=50;
   visCtx.clearRect(0,0,visCanvas.width,visCanvas.height);
-
-  // Generate new targets when playing
-  if(isPlaying){
-    for(let i=0;i<visBars;i++){
-      if(Math.random()>0.7) visTargets[i]=Math.random()*0.8+0.2;
-    }
-  } else {
-    for(let i=0;i<visBars;i++) visTargets[i]=0;
-  }
-
-  // Smooth interpolation
-  for(let i=0;i<visBars;i++){
-    visValues[i]+=(visTargets[i]-visValues[i])*0.15;
-    visTargets[i]*=0.92; // decay
-  }
-
-  const barW=visCanvas.width/visBars;
-  for(let i=0;i<visBars;i++){
-    const v=visValues[i];
-    const h=v*40;
+  const bars=dataArray.length/2;const barW=visCanvas.width/bars;
+  for(let i=0;i<bars;i++){
+    const v=dataArray[i]/255;const h=v*40;
     const hue=235+v*30;
-    visCtx.fillStyle='hsla('+hue+',60%,65%,'+Math.max(0.05,v*0.5)+')';
+    visCtx.fillStyle='hsla('+hue+',60%,65%,'+v*0.5+')';
     visCtx.fillRect(i*barW,50-h,barW-1,h);
-    // Mirror reflection
     visCtx.fillStyle='hsla('+hue+',60%,65%,'+v*0.15+')';
     visCtx.fillRect(i*barW,50,barW-1,h*0.4);
   }
 }
-drawVis();
+document.addEventListener('click',()=>initVisualizer(),{once:true});
 
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT')return;

@@ -1943,6 +1943,9 @@ document.addEventListener('mousemove',e=>{
   if(!glowRaf) glowRaf=requestAnimationFrame(updateGlow);
 });
 document.addEventListener('mouseleave',()=>{ glowTargetX=window.innerWidth/2; glowTargetY=-200; });
+// Reset rAF handle when tab regains focus (rAF pauses on blur)
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) glowRaf=0; });
+window.addEventListener('focus',()=>{ glowRaf=0; });
 
 // ========== CLOCK REFLECTION ==========
 const clockReflection=document.getElementById('clock-reflection');

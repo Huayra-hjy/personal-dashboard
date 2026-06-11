@@ -1045,11 +1045,11 @@
     width: 400px;
     height: 400px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.07) 0%, transparent 70%);
+    background: radial-gradient(circle, currentColor 0%, transparent 70%);
+    opacity: 0.12;
     pointer-events: none;
-    z-index: 0;
+    z-index: 2;
     will-change: transform;
-    /* no transition — movement is driven by rAF lerp, not CSS */
   }
 
   body::after {
@@ -2645,6 +2645,9 @@ function applyTheme(name){
   const r=document.documentElement;
   Object.entries(theme.vars).forEach(([k,v])=>r.style.setProperty(k,v));
   document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===name));
+  // Update mouse-glow color to match theme accent
+  const mg=document.getElementById('mouseGlow');
+  if(mg) mg.style.color=theme.vars['--primary'];
 }
 applyTheme(currentTheme);
 

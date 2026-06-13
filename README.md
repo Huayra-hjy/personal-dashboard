@@ -16,6 +16,8 @@ A beautiful single-file HTML start page with clock, search, weather, music playe
 - **System Monitor** — CPU cores, JS heap memory, network type
 - **GitHub Heatmap** — Contribution-style activity grid
 - **Countdown** — Track important dates with days remaining
+- **CS2 Matches** — Real-time CS2 match scores from HLTV
+- **Command Palette** — `Cmd+K` / `Ctrl+K` for quick actions
 - **Command Palette** — `Cmd+K` / `Ctrl+K` for quick actions
 - **Theme System** — 3 themes: Linear (dark), Neon (cyber), Pastel (light)
 - **GSAP Animations** — Smooth entrance animations, hover effects, breathing pulses

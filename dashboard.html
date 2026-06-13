@@ -303,6 +303,95 @@
   }
 
   /* ========== QUOTE ========== */
+  /* ========== CS2 MATCHES ========== */
+  .cs2-matches {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 0;
+    overflow-y: auto;
+    max-height: 200px;
+  }
+  .cs2-match {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: var(--surface-2);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--hairline);
+    transition: all var(--transition);
+  }
+  .cs2-match:hover {
+    border-color: var(--primary);
+    background: var(--surface-3);
+  }
+  .cs2-match.live {
+    border-color: var(--danger);
+    animation: cs2-pulse 2s infinite;
+  }
+  @keyframes cs2-pulse {
+    0%, 100% { border-color: var(--danger); }
+    50% { border-color: transparent; }
+  }
+  .cs2-team {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .cs2-team-logo {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    object-fit: contain;
+  }
+  .cs2-score {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    min-width: 40px;
+    text-align: center;
+  }
+  .cs2-match.live .cs2-score {
+    color: var(--danger);
+  }
+  .cs2-event {
+    font-size: 11px;
+    color: var(--ink-subtle);
+    margin-top: 2px;
+  }
+  .cs2-status {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: var(--radius-pill);
+    font-weight: 500;
+  }
+  .cs2-status.live {
+    background: var(--danger);
+    color: white;
+  }
+  .cs2-status.upcoming {
+    background: var(--surface-4);
+    color: var(--ink-muted);
+  }
+  .cs2-status.finished {
+    background: var(--success);
+    color: white;
+  }
+  .cs2-loading, .cs2-empty {
+    text-align: center;
+    color: var(--ink-subtle);
+    font-size: 13px;
+    padding: 20px 0;
+  }
+  .cs2-refresh {
+    margin-top: auto;
+  }
+
   .quote-wrap {
     flex: 1;
     display: flex;
@@ -1667,7 +1756,19 @@
       <div id="weather-desc">加载中...</div>
       <div class="weather-forecast" id="weatherForecast"></div>
     </div>
+    <!-- CS2 Matches -->
+    <div class="card reveal-scale reveal-d2" style="display:flex;flex-direction:column">
+      <div class="card-header">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5 2 7L12 16l-6.5 4.5 2-7L2 9h7z"/></svg>
+        <div class="card-header-text"><div class="card-title">CS2 比赛</div><div class="card-desc">实时比分</div></div>
+      </div>
+      <div class="cs2-matches" id="cs2Matches">
+        <div class="cs2-loading">加载中...</div>
+      </div>
+      <button class="cs2-refresh flair-btn" onclick="loadCS2Matches()">↻ 刷新</button>
+    </div>
 
+    <!-- Quote -->
     <!-- Quote -->
     <div class="card reveal-scale reveal-d2" style="display:flex;flex-direction:column">
       <div class="card-header">
@@ -1977,6 +2078,69 @@ const fallbackQuotes=[
   ['软件设计就像建筑一样，少即是多。','Ludwig Mies van der Rohe'],
   ['好的工具不会增加复杂度，而是消解它。','Alan Kay'],
 ];
+// ========== CS2 MATCHES ==========
+function loadCS2Matches(){
+  const container=document.getElementById('cs2Matches');
+  container.innerHTML='<div class="cs2-loading">加载中...</div>';
+  
+  // 使用HLTV API获取比赛数据
+  fetch('https://www.hltv.org/matches',{
+    headers:{'User-Agent':'Mozilla/5.0'}
+  })
+  .then(r=>r.text())
+  .then(html=>{
+    // 解析比赛数据
+    const matches=[];
+    const parser=new DOMParser();
+    const doc=parser.parseFromString(html,'text/html');
+    
+    // 查找正在进行的比赛
+    const liveMatches=doc.querySelectorAll('.live-match');
+    liveMatches.forEach(match=>{
+      const team1=match.querySelector('.team1 .team-name')?.textContent||'';
+      const team2=match.querySelector('.team2 .team-name')?.textContent||'';
+      const score1=match.querySelector('.team1 .score')?.textContent||'';
+      const score2=match.querySelector('.team2 .score')?.textContent||'';
+      const event=match.querySelector('.event-name')?.textContent||'';
+      
+      if(team1&&team2){
+        matches.push({
+          team1,score1,team2,score2,
+          event,status:'live',
+          isLive:true
+        });
+      }
+    });
+    
+    // 如果没有找到比赛，显示提示
+    if(matches.length===0){
+      container.innerHTML='<div class="cs2-empty">暂无正在进行的比赛</div>';
+      return;
+    }
+    
+    // 渲染比赛
+    container.innerHTML=matches.map(m=>`
+      <div class="cs2-match ${m.isLive?'live':''}">
+        <div class="cs2-team">
+          <span>${m.team1}</span>
+        </div>
+        <div class="cs2-score">${m.score1} : ${m.score2}</div>
+        <div class="cs2-team">
+          <span>${m.team2}</span>
+        </div>
+        ${m.isLive?'<span class="cs2-status live">LIVE</span>':''}
+      </div>
+    `).join('');
+  })
+  .catch(()=>{
+    container.innerHTML='<div class="cs2-empty">加载失败，请稍后重试</div>';
+  });
+}
+// 页面加载时获取比赛
+loadCS2Matches();
+// 每2分钟自动刷新
+setInterval(loadCS2Matches,120000);
+
 function loadQuote(){
   fetch('https://v1.hitokoto.cn/?c=d&c=h&c=i&c=k&encode=json')
     .then(r=>r.json())

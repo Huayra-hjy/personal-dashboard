@@ -311,6 +311,43 @@
     padding: 12px 0 8px;
     position: relative;
   }
+  /* ========== GITHUB CONFIG ========== */
+  .gh-config {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .gh-username-input {
+    flex: 1;
+    padding: 6px 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-xs);
+    color: var(--ink);
+    font-size: 13px;
+    outline: none;
+    transition: border-color var(--transition);
+  }
+  .gh-username-input:focus {
+    border-color: var(--primary);
+  }
+  .gh-username-input::placeholder {
+    color: var(--ink-tertiary);
+  }
+  .gh-save-btn {
+    padding: 6px 12px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-xs);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .gh-save-btn:hover {
+    background: var(--primary-hover);
+  }
+
   .quote-mark {
     font-family: Georgia, 'Times New Roman', serif;
     font-size: 64px;
@@ -1759,7 +1796,11 @@
     <div class="card reveal-scale reveal-d5">
       <div class="card-header">
         <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/><path d="M11.5 3a17 17 0 0 0 0 18"/><path d="M12.5 3a17 17 0 0 1 0 18"/></svg>
-        <div class="card-header-text"><div class="card-title">贡献热力图</div></div>
+        <div class="card-header-text"><div class="card-title">贡献热力图</div><div class="card-desc">GitHub</div></div>
+      </div>
+      <div class="gh-config">
+        <input class="gh-username-input" id="ghUsernameInput" placeholder="GitHub 用户名" />
+        <button class="gh-save-btn" onclick="saveGitHubUsername()">保存</button>
       </div>
       <div class="gh-grid" id="ghGrid"></div>
       <div class="gh-stats">
@@ -1977,6 +2018,77 @@ const fallbackQuotes=[
   ['软件设计就像建筑一样，少即是多。','Ludwig Mies van der Rohe'],
   ['好的工具不会增加复杂度，而是消解它。','Alan Kay'],
 ];
+// ========== GITHUB USERNAME CONFIG ==========
+function saveGitHubUsername(){
+  const username=document.getElementById('ghUsernameInput').value.trim();
+  if(username){
+    localStorage.setItem('github-username',username);
+    // 重新加载热力图
+    if(typeof initGitHubHeatmap==='function'){
+      initGitHubHeatmap();
+    }
+  }
+}
+// 页面加载时填充已保存的用户名
+document.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('github-username')||'';
+  const input=document.getElementById('ghUsernameInput');
+  if(input) input.value=saved;
+});
+
+// ========== CS2 MATCHES ==========
+function loadCS2Matches(){
+  const container=document.getElementById('cs2Matches');
+  if(!container) return;
+  container.innerHTML='<div class="cs2-loading">加载中...</div>';
+  
+  // 使用CORS代理获取HLTV比赛数据
+  const corsProxy='https://corsproxy.io/?';
+  fetch(corsProxy+encodeURIComponent('https://www.hltv.org/matches'),{
+    headers:{'User-Agent':'Mozilla/5.0'}
+  })
+  .then(r=>r.text())
+  .then(html=>{
+    const matches=[];
+    const parser=new DOMParser();
+    const doc=parser.parseFromString(html,'text/html');
+    
+    // 查找正在进行的比赛
+    const liveMatches=doc.querySelectorAll('.live-match');
+    liveMatches.forEach(match=>{
+      const team1=match.querySelector('.team1 .team-name')?.textContent||'';
+      const team2=match.querySelector('.team2 .team-name')?.textContent||'';
+      const score1=match.querySelector('.team1 .score')?.textContent||'';
+      const score2=match.querySelector('.team2 .score')?.textContent||'';
+      
+      if(team1&&team2){
+        matches.push({team1,score1,team2,score2,isLive:true});
+      }
+    });
+    
+    if(matches.length===0){
+      container.innerHTML='<div class="cs2-empty">暂无正在进行的比赛</div>';
+      return;
+    }
+    
+    container.innerHTML=matches.map(m=>`
+      <div class="cs2-match ${m.isLive?'live':''}">
+        <div class="cs2-team"><span>${m.team1}</span></div>
+        <div class="cs2-score">${m.score1} : ${m.score2}</div>
+        <div class="cs2-team"><span>${m.team2}</span></div>
+        ${m.isLive?'<span class="cs2-status live">LIVE</span>':''}
+      </div>
+    `).join('');
+  })
+  .catch(()=>{
+    container.innerHTML='<div class="cs2-empty">加载失败，请稍后重试</div>';
+  });
+}
+// 页面加载时获取比赛
+loadCS2Matches();
+// 每2分钟自动刷新
+setInterval(loadCS2Matches,120000);
+
 function loadQuote(){
   fetch('https://v1.hitokoto.cn/?c=d&c=h&c=i&c=k&encode=json')
     .then(r=>r.json())
